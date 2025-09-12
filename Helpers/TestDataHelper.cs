@@ -13,6 +13,11 @@
             { "Electricity", 5 },
             { "Oil", 3 }
         };
+
+        public const string HomeUrl = "https://ensekautomationcandidatetest.azurewebsites.net/";
+        public const string SellEnergyHref = "/Energy/Sell";
+        public const string SellEnergyUrl = "https://ensekautomationcandidatetest.azurewebsites.net/Energy/Sell";
+        public const string MaintenanceImageSrc = "/Content/Images/maintenance-1151312_960_720.png";
     }
 }
 
