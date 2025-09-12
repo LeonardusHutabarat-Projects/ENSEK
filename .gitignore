@@ -1,0 +1,8 @@
+# Visual Studio cache and build output
+.vs/
+*.user
+*.suo
+*.dbmdl
+*.log
+bin/
+obj/
