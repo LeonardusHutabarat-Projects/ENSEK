@@ -54,7 +54,7 @@ namespace ENSEKAutomationTests.ApiTests
         }
 
         [Test]
-        public async Task PutUpdateOrder_ShouldFailIfInternalServerError()
+        public async Task PutUpdateOrder_ShouldUpdateSinglePreviousOrder()
         {
             var request = new RestRequest($"/ENSEK/orders/{_orderId}", Method.Put);
             request.AddJsonBody(new
@@ -79,7 +79,7 @@ namespace ENSEKAutomationTests.ApiTests
         }
 
         [Test]
-        public async Task GetOrderById_ShouldFailIfInternalServerError()
+        public async Task GetOrderById_ShouldReturnDetailsOfSinglePreviousOrder()
         {
             var request = new RestRequest($"/ENSEK/orders/{_orderId}", Method.Get);
             var response = await _client.ExecuteAsync(request);
@@ -99,7 +99,7 @@ namespace ENSEKAutomationTests.ApiTests
         }
 
         [Test]
-        public async Task DeleteOrder_ShouldHandleInternalServerError()
+        public async Task DeleteOrder_ShouldDeleteParticularOrder()
         {
             var request = new RestRequest($"/ENSEK/orders/{_orderId}", Method.Delete);
             var response = await _client.ExecuteAsync(request);

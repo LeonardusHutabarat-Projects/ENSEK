@@ -23,7 +23,7 @@ namespace ENSEKAutomationTests.ApiTests
         }
 
         [Test]
-        public async Task ResetTestData_ReturnsTestDataReset()
+        public async Task ResetTestData_ShouldResetTestData()
         {
             var request = new RestRequest("/ENSEK/reset", Method.Post);
 
