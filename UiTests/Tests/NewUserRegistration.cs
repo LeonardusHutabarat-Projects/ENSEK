@@ -9,7 +9,7 @@ namespace UiTests.Tests
     public class NewUserRegistration : PageTest
     {
         [Test]
-        public async Task NewUserCanRegisterSuccessfully()
+        public async Task RegisterNewUser_ShouldRegisterNewUser()
         {
             await Page.GotoAsync(TestDataHelper.HomeUrl);
 
