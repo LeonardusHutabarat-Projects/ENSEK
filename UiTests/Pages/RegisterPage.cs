@@ -10,7 +10,7 @@ namespace UiTests.Pages
         public ILocator EmailInput => _page.Locator("#Email");
         public ILocator PasswordInput => _page.Locator("#Password");
         public ILocator ConfirmPasswordInput => _page.Locator("#ConfirmPassword");
-        public ILocator RegisterButton => _page.Locator("input[value='Register']"); // For button with value='Register'
+        public ILocator RegisterButton => _page.Locator("input[value='Register']");
 
         // Constructor
         public RegisterPage(IPage page)
