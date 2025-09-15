@@ -15,6 +15,7 @@
         };
 
         public const string HomeUrl = "https://ensekautomationcandidatetest.azurewebsites.net/";
+        public const string BuyEnergyUrl = "https://ensekautomationcandidatetest.azurewebsites.net/Energy/Buy";
         public const string AccountRegisterHref = "/Account/Register";
         public const string SellEnergyHref = "/Energy/Sell";
         public const string SellEnergyUrl = "https://ensekautomationcandidatetest.azurewebsites.net/Energy/Sell";

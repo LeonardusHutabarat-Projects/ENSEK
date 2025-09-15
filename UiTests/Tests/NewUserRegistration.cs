@@ -31,9 +31,6 @@ namespace UiTests.Tests
                 Console.WriteLine(errorText);
                 Assert.Fail($"Registration failed with error");
             }
-
-            //Assert.That(Page.Url, Does.Contain("/Account/Register"), "Should attempt to register");
-            
         }
     }
 }

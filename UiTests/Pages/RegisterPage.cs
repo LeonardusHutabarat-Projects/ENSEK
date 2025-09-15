@@ -6,13 +6,11 @@ namespace UiTests.Pages
     {
         private readonly IPage _page;
 
-        // Locators for RegisterPage
         public ILocator EmailInput => _page.Locator("#Email");
         public ILocator PasswordInput => _page.Locator("#Password");
         public ILocator ConfirmPasswordInput => _page.Locator("#ConfirmPassword");
         public ILocator RegisterButton => _page.Locator("input[value='Register']");
 
-        // Constructor
         public RegisterPage(IPage page)
         {
             _page = page;

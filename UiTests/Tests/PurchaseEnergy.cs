@@ -12,7 +12,7 @@ namespace UiTests.Tests
         [Test]
         public async Task PurchaseEnergy_ShouldBeAbleToPurchase()
         {
-            await Page.GotoAsync("https://ensekautomationcandidatetest.azurewebsites.net/Energy/Buy");
+            await Page.GotoAsync(TestDataHelper.BuyEnergyUrl);
 
             var tableRows = Page.Locator("table.table tr");
             int totalRowCount = await tableRows.CountAsync();
