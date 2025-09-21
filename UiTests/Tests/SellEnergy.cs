@@ -1,13 +1,18 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
+﻿using Helpers;
 using Microsoft.Playwright.NUnit;
-using Helpers;
 
 namespace UiTests.Tests
 {
+
+    /// <summary>
+    /// 
+    /// This UI test is for verifying the availability of the Sell Energy page.
+    /// Navigates to the home page, clicks the Sell Energy link, and checks
+    /// whether the page is accessible or under maintenance. The test fails
+    /// if a maintenance image is displayed, otherwise it passes.
+    /// 
+    /// </summary>
+
     [TestFixture]
     public class SellEnergy : PageTest
     {

@@ -1,11 +1,29 @@
-﻿using Microsoft.Playwright.NUnit;
+﻿using Helpers;
 using Microsoft.Playwright;
-using NUnit.Framework;
-using System.Threading.Tasks;
-using Helpers;
+using Microsoft.Playwright.NUnit;
 
 namespace UiTests.Tests
 {
+
+    /// <summary>
+    /// 
+    /// This UI test class is for verifying the energy purchase flow in the web application.
+    /// This test navigates to the Buy Energy page, validates the table and its headers, 
+    /// and attempts to purchase specified energy types with the required number of units 
+    /// defined in the test data.
+    /// 
+    /// Key validations:
+    /// (1) Ensures the energy table is present and not null.
+    /// (2) Confirms that all expected table headers are displayed.
+    /// (3) Iterates through provided energy purchase data and verifies:
+    ///     * Corresponding table rows exist for each energy type.
+    ///     * Input fields for entering purchase quantity are available.
+    ///     * Buy buttons for each row are present and functional.
+    /// 
+    /// If all steps succeed without error, the test completes with success.
+    /// 
+    /// </summary>
+
     [TestFixture]
     public class PurchaseEnergy : PageTest
     {

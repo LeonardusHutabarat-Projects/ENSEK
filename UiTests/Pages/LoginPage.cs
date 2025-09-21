@@ -2,14 +2,21 @@
 
 namespace UiTests.Pages
 {
+
+    /// <summary>
+    /// 
+    /// This class represents the Login Page of the application under test.
+    /// Provides page object methods and locators to interact with elements
+    /// on the login screen, such as navigating to the registration page.
+    /// 
+    /// </summary>
+
     public class LoginPage
     {
         private readonly IPage _page;
 
-        // Locators for LoginPage
         public ILocator RegisterLink => _page.Locator("#registerLink");
 
-        // Constructor
         public LoginPage(IPage page)
         {
             _page = page;

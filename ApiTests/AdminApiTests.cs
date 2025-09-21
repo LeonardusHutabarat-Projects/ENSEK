@@ -1,10 +1,26 @@
-﻿using NUnit.Framework;
+﻿using Helpers;
 using RestSharp;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace ENSEKAutomationTests.ApiTests
 {
+
+    /// <summary>
+    /// 
+    /// This API test is for verifying the functionality of the Admin Reset API endpoint
+    /// (/ENSEK/reset).
+    /// 
+    /// The test sends a POST request to reset the application’s test data and validates 
+    /// the response code:
+    /// - 200 OK confirms a successful reset
+    /// - 401 Unauthorized indicates lack of authorization
+    /// - Any other status codes are treated as unexpected failures
+    /// 
+    /// This test ensures the reset functionality works correctly and provides
+    /// clear feedback in both success and error scenarios.
+    /// 
+    /// </summary>
+
     [TestFixture]
     public class AdminApiTests
     {
@@ -13,7 +29,7 @@ namespace ENSEKAutomationTests.ApiTests
         [SetUp]
         public void SetUp()
         {
-            _client = new RestClient("https://qacandidatetest.ensek.io");
+            _client = new RestClient(TestDataHelper.ApiUrl);
         }
 
         [TearDown]

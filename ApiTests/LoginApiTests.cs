@@ -1,11 +1,28 @@
-﻿using System;
+﻿using Helpers;
+using RestSharp;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using NUnit.Framework;
-using RestSharp;
 
 namespace ENSEKAutomationTests.ApiTests
 {
+
+    /// <summary>
+    /// 
+    /// This API test is for verifing the login API endpoint POST /ENSEK/login
+    /// by sending valid credentials and checking that a successful response is received.
+    /// 
+    /// A RestClient is initialized with the ENSEK test base URL.
+    /// The test sends a POST request with JSON username and password.
+    /// It validates that the API call is successful and returns an HTTP success status.
+    /// The response is deserialized into a JSON object.
+    /// Assertions confirm that the response contains a "message" field 
+    /// with the value "Success" and an "access_token" is present and not empty.
+    /// The extracted access token and confirmation message are logged to the test output.
+    /// If the API call fails or the response cannot be deserialized, the test fails
+    /// with detailed error output.
+    /// 
+    /// </summary>
+
     [TestFixture]
     public class LoginApiTests
     {
@@ -14,7 +31,7 @@ namespace ENSEKAutomationTests.ApiTests
         [SetUp]
         public void SetUp()
         {
-            _client = new RestClient("https://qacandidatetest.ensek.io");
+            _client = new RestClient(TestDataHelper.ApiUrl);
         }
 
         [TearDown]
@@ -26,7 +43,7 @@ namespace ENSEKAutomationTests.ApiTests
         [Test]
         public void PostLogin_ShouldExtractAccessToken()
         {
-            var request = new RestRequest("/ENSEK/login", Method.Post);
+            var request = new RestRequest(TestDataHelper.LoginHref, Method.Post);
             request.AddHeader("Accept", "application/json");
             request.AddJsonBody(new
             {

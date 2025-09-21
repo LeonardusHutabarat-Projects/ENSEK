@@ -1,15 +1,31 @@
-﻿using RestSharp;
-using System.Net;
-using System.Threading.Tasks;
+﻿using Helpers;
 using Newtonsoft.Json.Linq;
+using RestSharp;
+using System.Net;
 
 namespace ENSEKAutomationTests.Helpers
 {
+
+    /// <summary>
+    /// 
+    /// This class sends a PUT request to purchase a specified quantity of energy by its ID,
+    /// then attempts to parse and return the generated order ID from the response.
+    /// Logs the status code, response content, and any exceptions encountered.
+    /// Returns null if the request fails, if no content is returned,
+    /// or if an order ID cannot be extracted from the response.
+    /// 
+    /// </summary>
+    /// 
+    /// <param name="client">The RestSharp <see cref="RestClient"/> used to send the request.</param>
+    /// <param name="energyId">The numeric identifier of the energy type to purchase.</param>
+    /// <param name="quantity">The amount of energy units to buy.</param>
+    /// <returns>The extracted order ID as a string if successful; otherwise null.</returns>
+
     public static class EnergyOrderHelper
     {
         public static async Task<string?> BuyEnergyAndGetOrderIdAsync(RestClient client, int energyId, int quantity)
         {
-            var request = new RestRequest($"/ENSEK/buy/{energyId}/{quantity}", Method.Put);
+            var request = new RestRequest($"{TestDataHelper.BuyEnergyHref}/{energyId}/{quantity}", Method.Put);
             RestResponse? response = null;
             try
             {

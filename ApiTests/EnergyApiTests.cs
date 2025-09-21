@@ -1,13 +1,39 @@
-﻿using NUnit.Framework;
+﻿using Helpers;
 using RestSharp;
 using System.Net;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using System.Text.Json;
-using Helpers;
 
 namespace ENSEKAutomationTests.ApiTests
 {
+
+    /// <summary>
+    /// 
+    /// This API test is for verifying the endpoint of /ENSEK/energy.
+    ///  
+    /// This test class covers two main scenarios:
+    /// (1) GET request to retrieve a list of available energy types:
+    ///     - Endpoint: GET /energy
+    ///     - Validates the API responds with 200 OK and
+    ///       returns a properly formatted JSON list of energy types.
+    ///     - Pretty-prints the JSON content for debugging and diagnostics.
+    ///     - Fails if the response returns any unexpected HTTP status code.
+    /// 
+    /// (2) PUT request to purchase a specified quantity of an energy unit:
+    ///     - Endpoint: PUT /buy/{energyId}/{quantity}
+    ///     - Attempts to purchase a valid energy type with a provided ID and quantity.
+    ///     - Expects a 200 OK response with a confirmation message containing
+    ///       "You have purchased".
+    ///     - Handles errors and asserts failure for invalid input
+    ///       (400 Bad Request) or any unexpected status code.
+    ///     - Exception handling ensures unexpected runtime issues are caught
+    ///       and reported as test failures.
+    /// 
+    /// The RestClient instance is initialised before each test and disposed after execution.
+    /// These automated checks provide coverage for critical ENSEK energy API functionality: 
+    /// retrieving available energy types and completing energy purchases.
+    /// 
+    /// </summary>
+
     [TestFixture]
     public class EnergyApiTests
     {
@@ -16,7 +42,7 @@ namespace ENSEKAutomationTests.ApiTests
         [SetUp]
         public void SetUp()
         {
-            _client = new RestClient("https://qacandidatetest.ensek.io");
+            _client = new RestClient(TestDataHelper.ApiUrl);
         }
 
         [TearDown]
@@ -28,7 +54,7 @@ namespace ENSEKAutomationTests.ApiTests
         [Test]
         public async Task GetDetailsOnEnergyType_ShouldGiveList()
         {
-            var request = new RestRequest("/ENSEK/energy", Method.Get);
+            var request = new RestRequest(TestDataHelper.EnergyHref, Method.Get);
             RestResponse? response = null;
             response = await _client.ExecuteAsync(request);
 
@@ -52,7 +78,7 @@ namespace ENSEKAutomationTests.ApiTests
         {
             int energyId = TestDataHelper.ValidEnergyId;
             int quantity = TestDataHelper.ValidQuantity;
-            var request = new RestRequest($"/ENSEK/buy/{energyId}/{quantity}", Method.Put);
+            var request = new RestRequest($"{TestDataHelper.BuyEnergyHref}/{energyId}/{quantity}", Method.Put);
 
             RestResponse? response = null;
             try

@@ -2,6 +2,14 @@
 
 namespace UiTests.Pages
 {
+
+    /// <summary>
+    /// 
+    /// This class represents the user registration page and 
+    /// provides methods to automate user registration via Playwright UI tests.
+    /// 
+    /// </summary>
+
     public class RegisterPage
     {
         private readonly IPage _page;
@@ -25,4 +33,3 @@ namespace UiTests.Pages
         }
     }
 }
-
