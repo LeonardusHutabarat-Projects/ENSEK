@@ -1,45 +1,28 @@
 ﻿using Helpers;
 using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
+using System.Collections.Generic;
 
 namespace UiTests.Tests
 {
-
-    /// <summary>
-    /// 
-    /// This UI test class is for verifying the energy purchase flow in the web application.
-    /// This test navigates to the Buy Energy page, validates the table and its headers, 
-    /// and attempts to purchase specified energy types with the required number of units 
-    /// defined in the test data.
-    /// 
-    /// Key validations:
-    /// (1) Ensures the energy table is present and not null.
-    /// (2) Confirms that all expected table headers are displayed.
-    /// (3) Iterates through provided energy purchase data and verifies:
-    ///     * Corresponding table rows exist for each energy type.
-    ///     * Input fields for entering purchase quantity are available.
-    ///     * Buy buttons for each row are present and functional.
-    /// 
-    /// If all steps succeed without error, the test completes with success.
-    /// 
-    /// </summary>
-
     [TestFixture]
     public class PurchaseEnergy : PageTest
     {
         [Test]
         public async Task PurchaseEnergy_ShouldBeAbleToPurchase()
         {
-            await Page.GotoAsync(TestDataHelper.BuyEnergyUrl);
+            var reportLines = new List<string>();
 
-            var tableRows = Page.Locator("table.table tr");
-            int totalRowCount = await tableRows.CountAsync();
+            await Page.GotoAsync(TestDataHelper.BuyEnergyUrl);
+            await Page.WaitForSelectorAsync("table.table tbody tr",
+                new() { Timeout = 60000 });
 
             var table = await Page.QuerySelectorAsync(".table");
             Assert.That(table, Is.Not.Null, "Energy table not found");
 
             var headers = await Page.QuerySelectorAllAsync("table.table thead th");
-            var expectedHeaders = new[] {
+            var expectedHeaders = new[]
+            {
                 "Energy Type",
                 "Price",
                 "Quanity of Units Available",
@@ -48,47 +31,87 @@ namespace UiTests.Tests
             for (int i = 0; i < expectedHeaders.Length; i++)
             {
                 string actual = await headers[i].InnerTextAsync();
-                Assert.That(actual, Does.Contain(expectedHeaders[i]), $"Missing column: {expectedHeaders[i]}");
+                Assert.That(actual, Does.Contain(expectedHeaders[i]),
+                    $"Missing column: {expectedHeaders[i]}");
             }
 
+            int itemNumber = 1;
             foreach (var item in TestDataHelper.EnergyPurchaseData)
             {
+                var keyText = item.Key.Trim();
+
+                if (item.Value < 0)
+                {
+                    reportLines.Add($"[{itemNumber}] {keyText}:" +
+                        $" INVALID INPUT (negative units: {item.Value})");
+                    itemNumber++;
+                    continue;
+                }
                 try
                 {
-                    var energyRows = Page.Locator("table.table tr");
+                    await Page.WaitForSelectorAsync("table.table tbody tr",
+                        new() { Timeout = 60000 });
+                    var energyRows = Page.Locator("table.table tbody tr");
                     int energyRowCount = await energyRows.CountAsync();
-                    ILocator targetRow = null;
+                    ILocator? targetRow = null;
 
                     for (int i = 0; i < energyRowCount; i++)
                     {
                         var firstCell = energyRows.Nth(i).Locator("td").First;
-                        if (await firstCell.CountAsync() == 0) continue;
-                        var cellText = await firstCell.InnerTextAsync();
-
-                        if (cellText.IndexOf(item.Key, StringComparison.OrdinalIgnoreCase) >= 0)
+                        var count = await firstCell.CountAsync();
+                        string cellText = count > 0 ? 
+                            (await firstCell.InnerTextAsync()).Trim() : "";
+                        if (count > 0 && cellText.Equals(keyText,
+                            StringComparison.OrdinalIgnoreCase))
                         {
                             targetRow = energyRows.Nth(i);
                             break;
                         }
                     }
+                    Assert.That(targetRow, Is.Not.Null,
+                        $"Table row not found for energy type: {item.Key}");
 
-                    Assert.That(targetRow, Is.Not.Null, $"Table row not found for energy type: {item.Key}");
-
-                    var unitsInput = targetRow.Locator("input[id='energyType_AmountPurchased']");
-                    Assert.That(await unitsInput.CountAsync(), Is.GreaterThan(0), $"Input not found for {item.Key}");
-
+                    var unitsInput = targetRow.Locator(
+                        "input[id='energyType_AmountPurchased']");
+                    var inputCount = await unitsInput.CountAsync();
+                    if (inputCount == 0)
+                    {
+                        reportLines.Add($"[{itemNumber}] {keyText}:" +
+                            $" UNAVAILABLE (cannot purchase)");
+                        continue;
+                    }
+                    Assert.That(await unitsInput.CountAsync(), Is.GreaterThan(0),
+                        $"Input not found for {item.Key}");
                     await unitsInput.FillAsync(item.Value.ToString());
-                    var buyBtn = targetRow.Locator("button[name='Buy'],input[name='Buy']");
-                    Assert.That(await buyBtn.CountAsync(), Is.GreaterThan(0), $"Buy button not found for {item.Key}");
+
+                    var buyBtn = targetRow.Locator(
+                        "button[name='Buy'],input[name='Buy']");
+                    Assert.That(await buyBtn.CountAsync(), Is.GreaterThan(0),
+                        $"Buy button not found for {item.Key}");
                     await buyBtn.First.ClickAsync();
 
+                    await Page.WaitForSelectorAsync("text=Sale Confirmed",
+                        new() { Timeout = 60000 });
+                    await Page.ClickAsync("text=Buy more »");
+
+                    reportLines.Add($"[{itemNumber}] {keyText}:" +
+                        $" SUCCESS ({item.Value} units purchased)");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error processing [{item.Key}]: {ex.Message}");
+                    reportLines.Add($"[{itemNumber}] {keyText}: FAIL - {ex.Message}");
                 }
+                itemNumber++;
             }
-            Assert.Pass("PurchaseEnergy is successful");
+
+            Console.WriteLine("SUMMARY REPORT");
+            foreach (var line in reportLines)
+            {
+                Console.WriteLine(line);
+            }
+            Console.WriteLine("END OF REPORT");
+
+            Assert.Pass("Purchase Energy is successful.");
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Helpers;
-using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using UiTests.Pages;
 

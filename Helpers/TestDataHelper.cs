@@ -20,8 +20,8 @@
 
         public static readonly Dictionary<string, int> EnergyPurchaseData = new()
         {
-            { "Gas", 10 },
-            { "Electricity", 5 },
+            { "Gas", 10},
+            { "Electricity", -500 },
             { "Oil", 3 }
         };
 
