@@ -1,5 +1,6 @@
 ﻿using Helpers;
 using RestSharp;
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -9,17 +10,21 @@ namespace ENSEKAutomationTests.ApiTests
     /// <summary>
     /// 
     /// This API test is for verifing the login API endpoint POST /ENSEK/login
-    /// by sending valid credentials and checking that a successful response is received.
+    /// by sending valid credentials and checking that a successful response
+    /// is received.
     /// 
     /// A RestClient is initialized with the ENSEK test base URL.
     /// The test sends a POST request with JSON username and password.
-    /// It validates that the API call is successful and returns an HTTP success status.
-    /// The response is deserialized into a JSON object.
+    /// It validates that the API call is successful and returns
+    /// an HTTP success status.
+    /// 
+    /// The response is deserialised into a JSON object.
     /// Assertions confirm that the response contains a "message" field 
     /// with the value "Success" and an "access_token" is present and not empty.
-    /// The extracted access token and confirmation message are logged to the test output.
-    /// If the API call fails or the response cannot be deserialized, the test fails
-    /// with detailed error output.
+    /// The extracted access token and confirmation message are logged
+    /// to the test output.
+    /// If the API call fails or the response cannot be deserialised,
+    /// the test fails with detailed error output.
     /// 
     /// </summary>
 
@@ -47,37 +52,64 @@ namespace ENSEKAutomationTests.ApiTests
             request.AddHeader("Accept", "application/json");
             request.AddJsonBody(new
             {
-                username = "test",
-                password = "testing"
+                username = TestDataHelper.Username,
+                password = TestDataHelper.Password
             });
 
             var response = _client.Execute(request);
 
             if (!response.IsSuccessful)
             {
-                Console.WriteLine($"ERROR: Status={response.StatusCode} | {response.ErrorException?.Message ?? response.StatusDescription}");
-                Assert.Fail($"API call failed: {response.StatusCode} - {response.ErrorMessage}");
+                Console.WriteLine($"ERROR: Status={response.StatusCode} |" +
+                    $" {response.ErrorException?.Message ?? 
+                        response.StatusDescription}");
+                Assert.Fail($@"API call failed:
+                    StatusCode: {response.StatusCode}
+                    ErrorMsg: {response.ErrorMessage}");
             }
 
-            try
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                JsonNode? data = JsonSerializer.Deserialize<JsonNode>(response.Content!);
+                try
+                {
+                    JsonNode? data = JsonSerializer.Deserialize<JsonNode>
+                            (response.Content!);
 
-                Assert.That(data, Is.Not.Null, "No login response data received.");
-                Assert.That(data!["message"]?.ToString(), Is.EqualTo("Success"), "Login did not return 'Success' message.");
+                    Assert.That(data, Is.Not.Null, "No login response" +
+                        " data received.");
+                    Assert.That(data!["message"]?.ToString(), Is.EqualTo("Success"),
+                        "Login did not return 'Success' message.");
 
-                string? accessToken = data?["access_token"]?.ToString();
-                string? message = data?["message"]?.ToString();
-                Assert.That(accessToken, Is.Not.Empty, "Access token was not found in the response.");
+                    string? accessToken = data?["access_token"]?.ToString();
+                    string? message = data?["message"]?.ToString();
+                    Assert.That(accessToken, Is.Not.Empty,
+                        "Access token was not found in the response.");
 
-                Console.WriteLine($"Extracted access token: {accessToken}");
-                Console.WriteLine($"Message: {message}");
+                    Console.WriteLine($"Extracted access token: {accessToken}");
+                    Console.WriteLine($"Message: {message}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Deserialisation error: {ex.Message}");
+                    Assert.Fail("Deserialisation of API response failed.");
+                }
             }
-            catch (Exception ex)
+            else if (response.StatusCode == HttpStatusCode.BadRequest)
             {
-                Console.WriteLine($"Deserialization error: {ex.Message}");
-                Assert.Fail("Deserialization of API response failed.");
+                Assert.Fail("Bad Request: Check if the payload is not empty.");
             }
+            else if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                Assert.Fail("Unauthorized: Either username or" +
+                    " password or both is invalid");
+            }
+            else
+            {
+                Assert.Fail($@"Unexpected response:
+                StatusCode: {response.StatusCode}
+                Content: {response.Content}");
+            }
+
         }
     }
 }

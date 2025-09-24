@@ -1,8 +1,10 @@
 ﻿using ENSEKAutomationTests.Helpers;
 using Helpers;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using System.Net;
 using System.Text.Json;
+
 
 namespace ENSEKAutomationTests.ApiTests
 {
@@ -51,8 +53,10 @@ namespace ENSEKAutomationTests.ApiTests
         public async Task SetUp()
         {
             _client = new RestClient(TestDataHelper.ApiUrl);
-            _orderId = await EnergyOrderHelper.BuyEnergyAndGetOrderIdAsync(_client, energyId, quantity);
-            Assert.That(_orderId, Is.Not.Null, "Failed to create test order via helper!");
+            _orderId = await EnergyOrderHelper.
+                BuyEnergyAndGetOrderIdAsync(_client, energyId, quantity);
+            Assert.That(_orderId, Is.Not.Null, "Failed to create" +
+                " test order via helper!");
         }
 
         [TearDown]
@@ -67,21 +71,24 @@ namespace ENSEKAutomationTests.ApiTests
             var request = new RestRequest(TestDataHelper.OrderHref, Method.Get);
             var response = await _client.ExecuteAsync(request);
 
-            Console.WriteLine($"StatusCode: {response.StatusCode}");
-
-            string prettyJson = JsonSerializer.Serialize(
-                    JsonDocument.Parse(response.Content),
-                    new JsonSerializerOptions { WriteIndented = true }
-                );
-            Console.WriteLine(prettyJson);
-
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.Content, Does.StartWith("[").
+                And.Contain("id").And.Contain("quantity"));
+            var orders = JArray.Parse(response.Content);
+            Assert.That(orders.Count, Is.GreaterThan(0), "Orders" +
+                " array should not be empty.");
+            Assert.That(orders[0]["id"] != null ||
+                orders[0]["Id"] != null,
+                "Each order should have an 'id' or 'Id' property.");
 
-            Assert.That(response.Content, Does.StartWith("[").And.Contain("id").And.Contain("quantity"));
-
-            var orders = Newtonsoft.Json.Linq.JArray.Parse(response.Content);
-            Assert.That(orders.Count, Is.GreaterThan(0), "Orders array should not be empty.");
-            Assert.That(orders[0]["id"] != null || orders[0]["Id"] != null, "Each order should have an 'id' or 'Id' property.");
+            if (response.Content != null)
+            {
+                string prettyJson = JsonSerializer.Serialize(
+                        JsonDocument.Parse(response.Content),
+                        new JsonSerializerOptions { WriteIndented = true }
+                    );
+                Console.WriteLine(prettyJson);
+            }
         }
 
         [Test]
@@ -101,11 +108,13 @@ namespace ENSEKAutomationTests.ApiTests
             if (response.StatusCode == HttpStatusCode.InternalServerError &&
                 response.Content != null && response.Content.Contains("Internal Server Error"))
             {
-                Assert.Fail($"FAIL: PUT update by order id is broken! Got 500 Internal Server Error: {response.Content}");
+                Assert.Fail($"FAIL: PUT update by order id is broken!" +
+                    $" Got 500 Internal Server Error: {response.Content}");
             }
             else
             {
-                Assert.Pass($"PASS: PUT update order did not return 500. Actual: {response.StatusCode} - {response.Content}");
+                Assert.Pass($"PASS: PUT update order did not return 500." +
+                    $" Actual: {response.StatusCode} - {response.Content}");
             }
         }
 

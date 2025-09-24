@@ -12,6 +12,9 @@
     {
         public static int ValidEnergyId => 1;
         public static int ValidQuantity => 10;
+        public static string Username => "test";
+        public static string Password => "testing";
+
         public static string TestEmail => "inconsequential.stuff@googlemail.com";
         public static string TestPassword => "2025Gr@ntham";
 
@@ -31,7 +34,9 @@
         public const string LoginHref = "/ENSEK/login";
         public const string MaintenanceImageSrc = "/Content/Images/maintenance-1151312_960_720.png";
         public const string OrderHref = "/ENSEK/orders";
+        public const string ResetHref = "/ENSEK/reset";
         public const string SellEnergyHref = "/Energy/Sell";
         public const string SellEnergyUrl = "https://ensekautomationcandidatetest.azurewebsites.net/Energy/Sell";
+        
     }
 }

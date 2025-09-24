@@ -41,8 +41,7 @@ namespace ENSEKAutomationTests.ApiTests
         [Test]
         public async Task ResetTestData_ShouldResetTestData()
         {
-            var request = new RestRequest("/ENSEK/reset", Method.Post);
-
+            var request = new RestRequest(TestDataHelper.ResetHref, Method.Post);
             var response = await _client.ExecuteAsync(request);
 
             if (response.StatusCode == HttpStatusCode.OK)
@@ -55,7 +54,8 @@ namespace ENSEKAutomationTests.ApiTests
             }
             else
             {
-                Assert.Fail($"Reset failed. Unexpected status code: {(int)response.StatusCode} {response.StatusCode}");
+                Assert.Fail($"Reset failed. Unexpected status code:" +
+                    $" {(int)response.StatusCode} {response.StatusCode}");
             }
         }
     }

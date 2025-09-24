@@ -60,16 +60,22 @@ namespace ENSEKAutomationTests.ApiTests
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                string prettyJson = JsonSerializer.Serialize(
+                if (response.Content != null)
+                {
+                    string prettyJson = JsonSerializer.Serialize(
                     JsonDocument.Parse(response.Content),
                     new JsonSerializerOptions { WriteIndented = true }
-                );
-                Console.WriteLine(prettyJson);
-                Assert.Pass("Get Details on Energy Type successful: 200 OK");
+                    );
+                    Console.WriteLine(prettyJson);
+                    Assert.Pass("Get Details on Energy Type successful: 200 OK");
+                }
             }
             else
             {
-                Assert.Fail($"Get Details on Energy Type failed. Unexpected status code: {(int)response.StatusCode} {response.StatusCode}");
+                Assert.Fail($@"
+                    Get Details on Energy Type failed.
+                    Unexpected status code: 
+                    {(int)response.StatusCode} {response.StatusCode}");
             }
         }
 
@@ -78,25 +84,35 @@ namespace ENSEKAutomationTests.ApiTests
         {
             int energyId = TestDataHelper.ValidEnergyId;
             int quantity = TestDataHelper.ValidQuantity;
-            var request = new RestRequest($"{TestDataHelper.BuyEnergyHref}/{energyId}/{quantity}", Method.Put);
+
+            var request = new RestRequest(
+                $@"{TestDataHelper.BuyEnergyHref}/{energyId}/{quantity}",
+                Method.Put);
 
             RestResponse? response = null;
+
             try
             {
                 response = await _client.ExecuteAsync(request);
-                Console.WriteLine($"StatusCode: {response.StatusCode}");
-                Console.WriteLine($"Content: {response.Content}");
+
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    Assert.That(response.Content, Does.Contain("You have purchased"), "Expected confirmation message not found.");
+                    Assert.That(response.Content, Does.Contain("You have purchased"),
+                        $@"Expected confirmation message not found.");
                 }
                 else if (response.StatusCode == HttpStatusCode.BadRequest)
                 {
-                    Assert.Fail("Bad Request: Check if the ID/quantity is valid.");
+                    Assert.Fail("Bad Request: Check if the ID is valid.");
+                }
+                else if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    Assert.Fail("Bad Request: Check if the quantity is valid.");
                 }
                 else
                 {
-                    Assert.Fail($"Unexpected response: {response.StatusCode} - {response.Content}");
+                    Assert.Fail($@"Unexpected response:
+                    StatusCode: {response.StatusCode}
+                    Content: {response.Content}");
                 }
             }
             catch (Exception ex)

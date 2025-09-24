@@ -36,7 +36,6 @@ namespace ENSEKAutomationTests.Helpers
 
                 if (response.StatusCode == HttpStatusCode.OK && !string.IsNullOrEmpty(response.Content))
                 {
-
                     var json = JObject.Parse(response.Content);
                     var message = json["message"]?.ToString();
                     if (!string.IsNullOrEmpty(message))
