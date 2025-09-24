@@ -25,7 +25,7 @@ namespace UiTests.Tests
             {
                 "Energy Type",
                 "Price",
-                "Quanity of Units Available",
+                "Quantity of Units Available",
                 "Number of Units Required"
             };
             for (int i = 0; i < expectedHeaders.Length; i++)
