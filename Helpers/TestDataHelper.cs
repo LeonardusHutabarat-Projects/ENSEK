@@ -21,8 +21,15 @@
         public static readonly Dictionary<string, int> EnergyPurchaseData = new()
         {
             { "Gas", 10},
-            { "Electricity", -500 },
+            { "Electricity", 100 },
             { "Oil", 3 }
+        };
+
+        public static readonly Dictionary<string, int> InvalidEnergyPurchaseData = new()
+        {
+            { "Gas", -10},
+            { "Electricity", -100 },
+            { "Oil", -50 }
         };
 
         public const string AccountRegisterHref = "/Account/Register";

@@ -9,7 +9,7 @@ namespace UiTests.Tests
     public class BuyEnergy : PageTest
     {
         [Test]
-        public async Task BuyEnergy_ShouldBeAbleToBuy()
+        public async Task BuyEnergy_ShouldAllowBuyWithPositiveNumber()
         {
             var reportLines = new List<string>();
 
@@ -112,6 +112,125 @@ namespace UiTests.Tests
             Console.WriteLine("END OF REPORT");
 
             Assert.Pass("Buy Energy is successful.");
+        }
+        [Test]
+        public async Task BuyEnergy_ShouldBlockBuyWithNegativeNumber()
+        {
+            var reportLines = new List<string>();
+
+            await Page.GotoAsync(TestDataHelper.BuyEnergyUrl);
+            await Page.WaitForSelectorAsync("table.table tbody tr", new() { Timeout = 10000 });
+
+            var table = await Page.QuerySelectorAsync(".table");
+            Assert.That(table, Is.Not.Null, "Energy table not found");
+
+            var headers = await Page.QuerySelectorAllAsync("table.table thead th");
+            var expectedHeaders = new[]
+            {
+                "Energy Type",
+                "Price",
+                "Quanity of Units Available",
+                "Number of Units Required"
+            };
+
+            for (int i = 0; i < expectedHeaders.Length; i++)
+            {
+                string actual = await headers[i].InnerTextAsync();
+                Assert.That(actual, Does.Contain(expectedHeaders[i]),
+                    $"Missing column: {expectedHeaders[i]}");
+            }
+
+            int itemNumber = 1;
+            foreach (var item in TestDataHelper.InvalidEnergyPurchaseData)
+            {
+                var keyText = item.Key.Trim();
+
+                try
+                {
+                    await Page.WaitForSelectorAsync("table.table tbody tr",
+                        new() { Timeout = 10000 });
+                    var energyRows = Page.Locator("table.table tbody tr");
+                    int energyRowCount = await energyRows.CountAsync();
+                    ILocator? targetRow = null;
+
+                    for (int i = 0; i < energyRowCount; i++)
+                    {
+                        var firstCell = energyRows.Nth(i).Locator("td").First;
+                        var count = await firstCell.CountAsync();
+                        string cellText = count > 0 ? 
+                            (await firstCell.InnerTextAsync()).Trim() : "";
+                        if (count > 0 && cellText.Equals(keyText,
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            targetRow = energyRows.Nth(i);
+                            break;
+                        }
+                    }
+                    Assert.That(targetRow, Is.Not.Null,
+                        $"Table row not found for energy type: {item.Key}");
+
+                    var unitsInput = targetRow.
+                        Locator("input[id='energyType_AmountPurchased']");
+                    if (await unitsInput.CountAsync() == 0)
+                    {
+                        reportLines.Add($"[{itemNumber}] " +
+                            $"{keyText}: UNAVAILABLE (cannot purchase)");
+                        itemNumber++;
+                        continue;
+                    }
+                    await unitsInput.FillAsync(item.Value.ToString());
+
+                    var buyBtn = targetRow.Locator("button[name='Buy'],input[name='Buy']");
+                    Assert.That(await buyBtn.CountAsync(),
+                        Is.GreaterThan(0), $"Buy button not found for {item.Key}");
+                    await buyBtn.First.ClickAsync();
+
+                    bool saleConfirmed = false;
+                    try
+                    {
+                        await Page.WaitForSelectorAsync("text=Sale Confirmed",
+                            new() { Timeout = 2000 });
+                        saleConfirmed = true;
+                    }
+                    catch (TimeoutException)
+                    {
+                        saleConfirmed = false;
+                    }
+
+                    if (saleConfirmed)
+                    {
+                        var msg = $"[{itemNumber}] {keyText}:" +
+                            $" FAIL - Negative value allowed ({item.Value});" +
+                            $" Sale Confirmed! THIS IS A BUG.";
+                        reportLines.Add(msg);
+                        Console.WriteLine("SUMMARY REPORT");
+                        foreach (var line in reportLines)
+                            Console.WriteLine(line);
+                        Console.WriteLine("END OF REPORT");
+                        Assert.Fail(msg);
+                    }
+                    else
+                    {
+                        reportLines.Add($"[{itemNumber}] " +
+                            $"{keyText}: PASS - Negative input did NOT result" +
+                            $" in confirmation (blocked or ignored).");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    reportLines.Add($"[{itemNumber}]" +
+                        $" {keyText}: EXCEPTION - {ex.Message}");
+                    throw;
+                }
+                itemNumber++;
+            }
+
+            Console.WriteLine("SUMMARY REPORT");
+            foreach (var line in reportLines)
+                Console.WriteLine(line);
+            Console.WriteLine("END OF REPORT");
+            Assert.Pass("Buy Energy negative input check complete." +
+                " All negative numbers correctly blocked.");
         }
     }
 }
