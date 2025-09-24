@@ -6,10 +6,10 @@ using System.Collections.Generic;
 namespace UiTests.Tests
 {
     [TestFixture]
-    public class PurchaseEnergy : PageTest
+    public class BuyEnergy : PageTest
     {
         [Test]
-        public async Task PurchaseEnergy_ShouldBeAbleToPurchase()
+        public async Task BuyEnergy_ShouldBeAbleToBuy()
         {
             var reportLines = new List<string>();
 
@@ -111,7 +111,7 @@ namespace UiTests.Tests
             }
             Console.WriteLine("END OF REPORT");
 
-            Assert.Pass("Purchase Energy is successful.");
+            Assert.Pass("Buy Energy is successful.");
         }
     }
 }
